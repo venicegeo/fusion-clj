@@ -1,11 +1,7 @@
 (ns fusion-clj.reactor
   (:require [clojure.core.async :as async]
-            [clojure.data.json :as json]
-            [clojure.java.io :refer [reader]]
             [clj-kafka.new.producer :as p]
             [clj-kafka.consumer.zk :as c]
-            [clj-kafka.admin :as a]
-            [com.stuartsierra.dependency :as d]
             [fusion-clj.common :as com])
   (:import [java.util UUID]))
 

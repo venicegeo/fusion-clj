@@ -1,5 +1,9 @@
 (ns fusion-clj.common
-  (:require [clojure.data.json :as json]))
+  (:require [clojure.data.json :as json]
+            [clj-kafka.new.producer :as p]
+            [clj-kafka.consumer.zk :as c]
+            [clj-kafka.admin :as a]
+            [com.stuartsierra.dependency :as d]))
 
 (defn msg->clj
   "Converts a KafkaMessage whose .value is byte array value of a json
