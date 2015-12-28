@@ -31,10 +31,10 @@
                                      :zk localhost:2181
                                      :channel my-chan)"
   [producer-config & {:keys [consumer-config zk channel] :as p-config}]
-  (fn [topic message & [wait?]]
-    (let [producer (p/producer producer-config
+  (let [producer (p/producer producer-config
                                (p/string-serializer)
                                (p/byte-array-serializer))]
+    (fn [topic message & [wait?]]
       (if (and consumer-config zk wait?)
         (let [result (send-and-wait producer topic message consumer-config zk)]
           (if channel
