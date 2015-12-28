@@ -26,7 +26,7 @@ The reactor acts as a consumer of data from a pipeline or other reactors. At it'
 
 ### Pipeline
 
-```
+```clojure
 (:require [fusion-clj.pipeline :as p]
           [clojure.core.async :refer [thread chan <!!])
 
@@ -68,7 +68,7 @@ If a `:consumer-config` is provided you must also provide a `:zk` host string.
 
 ### Reactor
 
-```
+```clojure
 (:require [fusion-clj.reactor :as r]
           [clojure.core.async :refer [chan])
 
@@ -89,7 +89,7 @@ The `reactor` function takes two arguments, a `deps-fn` and a `proc-fn`, and ret
 
 The `deps-fn` should be a function which accepts a Kafka message in the form of a map:
 
-```
+```clojure
 {:topic "some-topic"
  :offset 42
  :partition 1
@@ -99,7 +99,7 @@ The `deps-fn` should be a function which accepts a Kafka message in the form of 
 
 It should return a map of dependencies (deps-map), if any, of the form:
 
-```
+```clojure
 {:one {:topic "add"
        :args [1 2 3]}
  :two {:topic "subtract"
@@ -112,21 +112,21 @@ It should return a map of dependencies (deps-map), if any, of the form:
 
 This tells the reactor what dependent processes must be executed prior to executing the `proc-fn`. Given a map of this form the reactor will generate a directed acyclic graph data structure and derive a sorted topology from that graph. In the example above, assume we have some simple "math" services. The reactor will derive that `:two` depends on `:one`. It will send a message to the `add` topic with `[1 2 3]` under the `:data` key and a `:return-topic "some-uuid"`:
 
-```
+```clojure
 {:return-topic "some-uuid"
  :data [1 2 3}}
 ```
 
 It will then create a consumer that reads from `return-topic`. When the response message arrives it will then process `:two` and the result of `:one` be injected using the `:arg-in-fn` (optional, defaults to `conj`) into `:two`'s `:args`. The message sent to the `subtract` topic will then look like this:
 
-```
+```clojure
 {:return-topic "some-uuid2"
  :data [6 2]}
 ```
 
 When all dependencies have been processed. The original message and the deps-map with a `:result` key for each dep in the following form with be passed to `proc-fn`:
 
-```
+```clojure
 {:one {:topic "add"
        :args [1 2 3]
        :result 6}
@@ -143,7 +143,7 @@ When all dependencies have been processed. The original message and the deps-map
 
 The proc-fn should be function which accepts one required argument, a kafka message in the form of a map, and one optional argument that is a map of the form 
 
-```
+```clojure
 {:some-step1 ..result..
  :some-step2 ..result..} 
 ```
@@ -174,7 +174,7 @@ Calling the function returned by `reactor` with the resulting map returned by `e
 
 It's recommended to hold a reference to the resulting map returned from `elements`, so that the reactor can be cleanly shut down.
 
-```
+```clojure
 (r/shutdown-reactor elements)
 ```
 
