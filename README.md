@@ -25,11 +25,44 @@ The reactor acts as a consumer of data from a pipeline or other reactors. At it'
 ### Pipeline
 
 ```
-(require '[fusion-clj.pipeline :as p])
+(:require [fusion-clj.pipeline :as p]
+          [clojure.core.async :refer [thread chan <!!])
+
+(def my-pipeline (p/pipeline {"bootstrap.servers" "localhost:9092"
+                              ...}
+                              :consumer-config {...}
+                              :zk "localhost:2181"
+                              :channel ..my-chan..}))
+
+;; Send a message to "my-topic" and tell the pipeline to block until 
+;; some consumer app "replies." If a channel was provided, puts the 
+;; response message on that channel.
+
+; sync
+(my-pipeline "my-topic" {:text "Hello, world"} true)
+
+; async
+(thread (my-pipeline "my-topic" {:text "Hello, world"} true))
+
+; async - no channel provided
+(<!! (thread (my-pipeline "my-topic" {:text "Hello, world"} true)))
+
+;; or...
+;; Send a message to "other-topic" and don't wait for a response.
+;; "Fire and forget." Returns a future which is a map of:
+;;
+;; {:topic "other-topic"
+;;  :partition ..partition..
+;;  :offset ..offset..}
+
+(my-pipeline "other-topic" {:text "Goodbye, world"})
 ```
 
-TODO
+The `pipeline` function takes a Kafka producer configuration map (required) and three additional optional arguments. The optional arguments are `:consumer-config` whose value is a configuration map for a Kafka consumer, `:zk` whose value is a host+port string of a Zookeeper host, and `:channel` whose value is a core.async channel.
 
+If a `:consumer-config` is provided you must also provide a `:zk` host string. 
+
+`pipeline` returns a function that takes a topic, a message, and an optional boolean flag that indicates whether the pipeline should wait for a response from a consumer app (`true`) or if it should simply send the message and return (`nil`, `false` - default). If the pipeline should wait for a response from a consumer app and you expect this to be a long wait, it's recommended to execute the pipeline function in a separate thread (basic example above).
 
 ### Reactor
 
@@ -144,10 +177,14 @@ It's recommended to hold a reference to the resulting map returned from `element
 ```
 
 Closes the channel (if provided), shuts down the main consumer, and closes the shared producer.
+
+### Notes
+
+fusion-clj uses the `org.apache.kafka.common.serialization.StringSerializer` for topics and the `org.apache.kafka.common.serialization.ByteArraySerializer` for message values. It also assumes that message values are json encoded strings. I'd like to make those options more flexible in the future.
     
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015 Radiant Blue
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
