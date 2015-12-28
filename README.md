@@ -188,5 +188,4 @@ fusion-clj uses the `org.apache.kafka.common.serialization.StringSerializer` for
 
 Copyright © 2015 Radiant Blue
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the Apache License version 2.0.
