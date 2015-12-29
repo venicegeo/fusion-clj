@@ -80,7 +80,7 @@
                                        (d/depend g* k d)) g k-deps)
                              g)) (d/graph) deps-map) ; build up our dep graph
                                         ; get the topological sort of the graph
-        topo (d/topo-sort dep-graph)]
+        topo (d/topo-sort graph)]
     (reduce (fn [a d]
               (let [args (-> deps-map d :args)
                     arg-in-fn (or (-> deps-map d :arg-in-fn) conj)
