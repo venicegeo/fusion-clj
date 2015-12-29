@@ -3,7 +3,8 @@
             [clj-kafka.new.producer :as p]
             [clj-kafka.consumer.zk :as c]
             [clj-kafka.admin :as a]
-            [com.stuartsierra.dependency :as d]))
+            [com.stuartsierra.dependency :as d])
+  (:import [java.util UUID]))
 
 (defn msg->clj
   "Converts a KafkaMessage whose .value is byte array value of a json

@@ -2,8 +2,7 @@
   (:require [clojure.core.async :as async]
             [clj-kafka.new.producer :as p]
             [clj-kafka.consumer.zk :as c]
-            [fusion-clj.common :as com])
-  (:import [java.util UUID]))
+            [fusion-clj.common :as com]))
 
 (defn- process
   "Main processing function of a reactor."
