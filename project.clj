@@ -1,4 +1,4 @@
-(defproject fusion-clj "0.1.2"
+(defproject fusion-clj "0.1.3"
   :description "Fusing ephemeral kafka queues for dependent distibuted processes"
   :url "http://github.com/venicegeo/fusion-clj"
   :license {:name "Apache License 2.0"
