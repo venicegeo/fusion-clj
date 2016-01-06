@@ -74,22 +74,23 @@
   keys are the keys of the deps-map whose values are the
   results of sending it's corresponding args to topic."
   [deps-map producer consumer-config zk]
-  (let [graph (reduce-kv (fn [g k v]
-                           (if-let [k-deps (:deps v)]
-                             (reduce (fn [g* d]
-                                       (d/depend g* k d)) g k-deps)
-                             g)) (d/graph) deps-map) ; build up our dep graph
+  (when deps-map
+    (let [graph (reduce-kv (fn [g k v]
+                             (if-let [k-deps (:deps v)]
+                               (reduce (fn [g* d]
+                                         (d/depend g* k d)) g k-deps)
+                               g)) (d/graph) deps-map) ; build up our dep graph
                                         ; get the topological sort of the graph
-        topo (d/topo-sort graph)]
-    (reduce (fn [a d]
-              (let [args (-> deps-map d :args)
-                    arg-in-fn (or (-> deps-map d :arg-in-fn) conj)
-                    args* (if-let [ds (d/immediate-dependencies graph d)]
-                            (reduce (fn [a* d*]
-                                      (arg-in-fn a* (-> a d* :result))) args ds)
-                            args)]
-                (assoc-in a [d :result] (-> (assoc (d deps-map) :args args*) ; "replace" the original args with those that include dependency results
-                                            (process-dep producer zk) ; process the dependency
-                                            (await-msg-return consumer-config zk) ; wait for a message on the :return-topic
-                                            :value))))
-            deps-map topo)))
+          topo (d/topo-sort graph)]
+      (reduce (fn [a d]
+                (let [args (-> deps-map d :args)
+                      arg-in-fn (or (-> deps-map d :arg-in-fn) conj)
+                      args* (if-let [ds (d/immediate-dependencies graph d)]
+                              (reduce (fn [a* d*]
+                                        (arg-in-fn a* (-> a d* :result))) args ds)
+                              args)]
+                  (assoc-in a [d :result] (-> (assoc (d deps-map) :args args*) ; "replace" the original args with those that include dependency results
+                                              (process-dep producer zk) ; process the dependency
+                                              (await-msg-return consumer-config zk) ; wait for a message on the :return-topic
+                                              :value))))
+              deps-map topo))))
